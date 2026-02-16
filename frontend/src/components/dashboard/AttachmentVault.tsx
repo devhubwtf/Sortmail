@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Attachment } from '@/types/dashboard';
+import { LegacyAttachment } from '@/types/dashboard';
 import { FileText, Image, Table, File, Download } from 'lucide-react';
 import gsap from 'gsap';
 
 interface AttachmentVaultProps {
-    attachments: Attachment[];
+    attachments: LegacyAttachment[];
 }
 
 const AttachmentVault: React.FC<AttachmentVaultProps> = ({ attachments }) => {

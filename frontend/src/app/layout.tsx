@@ -1,12 +1,32 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Serif_Display, Outfit, IBM_Plex_Mono } from "next/font/google";
 import "@/styles/globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const dmSerif = DM_Serif_Display({
+    weight: "400",
+    subsets: ["latin"],
+    variable: "--font-display",
+    display: "swap",
+});
+
+const outfit = Outfit({
+    subsets: ["latin"],
+    variable: "--font-body",
+    display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+    weight: ["400", "500", "600"],
+    subsets: ["latin"],
+    variable: "--font-mono",
+    display: "swap",
+});
 
 export const metadata: Metadata = {
-    title: "SortMail - AI Email Intelligence",
-    description: "AI-powered intelligence layer for Gmail & Outlook",
+    title: "SortMail — AI Email Intelligence for Gmail & Outlook",
+    description:
+        "AI-powered intelligence layer that summarizes threads, extracts tasks, and drafts replies. Your inbox, finally under control.",
+    keywords: ["email", "AI", "Gmail", "Outlook", "productivity", "task management"],
 };
 
 export default function RootLayout({
@@ -15,8 +35,11 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
-            <body className={inter.className}>{children}</body>
+        <html
+            lang="en"
+            className={`${dmSerif.variable} ${outfit.variable} ${ibmPlexMono.variable}`}
+        >
+            <body className="font-body antialiased">{children}</body>
         </html>
     );
 }

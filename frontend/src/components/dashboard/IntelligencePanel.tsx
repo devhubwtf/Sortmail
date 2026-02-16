@@ -1,7 +1,10 @@
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Email, Task, Attachment } from '@/types/dashboard';
-import gsap from 'gsap';
+import { LegacyEmail, LegacyTask } from '@/types/dashboard';
+// gsap v3.14 types don't expose .fromTo/.to on default export — cast for IDE compat
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+import _gsap from 'gsap';
+const gsap = _gsap as any;
 import {
     Sparkles, X, CheckSquare, MessageSquare, Calendar,
     Send, RotateCw, Copy, FileText, Image, Table, File,
@@ -9,9 +12,9 @@ import {
 } from 'lucide-react';
 
 interface IntelligencePanelProps {
-    email: Email | null;
+    email: LegacyEmail | null;
     onClose: () => void;
-    onAddTask: (task: Task) => void;
+    onAddTask: (task: LegacyTask) => void;
 }
 
 const IntelligencePanel: React.FC<IntelligencePanelProps> = ({ email, onClose, onAddTask }) => {
@@ -113,7 +116,7 @@ const IntelligencePanel: React.FC<IntelligencePanelProps> = ({ email, onClose, o
     }, [isReadingAttachment, attachmentSummary]);
 
     // Mock Analysis Simulation
-    const runAnalysisSimulation = async (currentEmail: Email) => {
+    const runAnalysisSimulation = async (currentEmail: LegacyEmail) => {
         setLoading(true);
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -144,9 +147,10 @@ const IntelligencePanel: React.FC<IntelligencePanelProps> = ({ email, onClose, o
 
     const handleCreateTask = (item: string) => {
         if (!email) return;
-        const newTask: Task = {
+        const newTask: LegacyTask = {
             id: Date.now().toString(),
             title: item,
+            description: '',
             sourceEmailId: email.id,
             status: 'todo'
         };
@@ -237,7 +241,7 @@ const IntelligencePanel: React.FC<IntelligencePanelProps> = ({ email, onClose, o
                                     </div>
                                     <div className="text-left overflow-hidden">
                                         <p className="text-xs font-medium text-zinc-200 truncate w-24">{att.name}</p>
-                                        <p className="text-([10px] text-zinc-500">{att.size}</p>
+                                        <p className="text-[10px] text-zinc-500">{att.size}</p>
                                     </div>
                                 </button>
                             ))}
@@ -255,7 +259,7 @@ const IntelligencePanel: React.FC<IntelligencePanelProps> = ({ email, onClose, o
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <Layers size={14} className="text-indigo-400" />
-                                            <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest text-shadow-indigo">Deep Summary</span>
+                                            <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">Deep Summary</span>
                                         </div>
                                         <span className="text-[10px] text-zinc-600 font-mono">AI-PROCESSED</span>
                                     </div>

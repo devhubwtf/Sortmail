@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Email, Urgency } from '@/types/dashboard';
+import { LegacyEmail, Urgency } from '@/types/dashboard';
 import { AlertCircle, Clock, CheckCircle2, Zap, ArrowRight, CornerUpLeft, Sparkles } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -8,8 +8,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 interface PriorityListProps {
-    emails: Email[];
-    onOpenAction: (email: Email) => void;
+    emails: LegacyEmail[];
+    onOpenAction: (email: LegacyEmail) => void;
 }
 
 const PriorityList: React.FC<PriorityListProps> = ({ emails, onOpenAction }) => {

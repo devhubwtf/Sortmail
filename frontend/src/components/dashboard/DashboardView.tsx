@@ -2,10 +2,10 @@
 import React, { useEffect } from 'react';
 import gsap from 'gsap';
 import { Sparkles, Activity, ArrowRight, Mail } from 'lucide-react';
-import { Email } from '@/types/dashboard';
+import { LegacyEmail } from '@/types/dashboard';
 
 interface DashboardViewProps {
-    emails: Email[];
+    emails: LegacyEmail[];
     briefingText: string;
 }
 

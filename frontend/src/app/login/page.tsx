@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { Command, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Loader2, Shield, Eye, Github, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -10,72 +10,96 @@ export default function LoginPage() {
     const [loading, setLoading] = useState<"google" | "outlook" | null>(null);
 
     useEffect(() => {
-        const tl = gsap.timeline();
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-        // Background elements
-        tl.fromTo(".bg-orb",
-            { scale: 0.8, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 1.5, ease: "power2.out", stagger: 0.2 }
-        );
+        // Hero text entrance
+        tl.fromTo(".hero-headline", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 });
+        tl.fromTo(".hero-sub", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, "-=0.4");
+        tl.fromTo(".hero-trust", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, "-=0.3");
 
-        // Card entrance
-        tl.fromTo(".auth-card",
-            { y: 30, opacity: 0, scale: 0.95 },
-            { y: 0, opacity: 1, scale: 1, duration: 0.8, ease: "power3.out" },
-            "-=1.0"
-        );
-
-        // Content stagger
-        tl.fromTo(".auth-item",
-            { y: 10, opacity: 0 },
-            { y: 0, opacity: 1, stagger: 0.1, duration: 0.5, ease: "power2.out" },
-            "-=0.4"
-        );
+        // Auth card entrance
+        tl.fromTo(".auth-card", { y: 30, opacity: 0, scale: 0.97 }, { y: 0, opacity: 1, scale: 1, duration: 0.7 }, "-=0.5");
+        tl.fromTo(".auth-item", { y: 10, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, duration: 0.4 }, "-=0.3");
     }, []);
 
     const handleLogin = (provider: "google" | "outlook") => {
         setLoading(provider);
-        // Simulate redirect delay
         setTimeout(() => {
-            window.location.href = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/${provider}`;
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL || ""}/api/auth/${provider}`;
         }, 800);
     };
 
     return (
-        <main ref={containerRef} className="min-h-screen w-full bg-[#09090B] flex items-center justify-center relative overflow-hidden font-sans selection:bg-indigo-500/30 text-zinc-100">
-            {/* Ambient Background */}
-            <div className="bg-orb absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="bg-orb absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <main ref={containerRef} className="min-h-screen w-full bg-paper flex items-center justify-center relative overflow-hidden">
+            {/* Subtle warm gradient orbs */}
+            <div className="absolute top-[-15%] left-[-10%] w-[700px] h-[700px] bg-[#C05E3C]/5 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-[-15%] right-[-8%] w-[600px] h-[600px] bg-[#7C5CFC]/5 rounded-full blur-[100px] pointer-events-none" />
 
-            {/* Auth Card */}
-            <div className="auth-card relative w-full max-w-[420px] mx-4 p-1 rounded-2xl bg-gradient-to-b from-white/10 to-white/5 shadow-2xl backdrop-blur-xl border border-white/10">
-                <div className="bg-[#09090B]/80 backdrop-blur-md rounded-xl p-8 sm:p-10 border border-white/5 relative overflow-hidden group">
+            <div className="max-w-5xl w-full mx-auto px-6 flex flex-col lg:flex-row items-center gap-16 py-12">
+                {/* ── Left: Hero Copy ─────────────────────────── */}
+                <div className="flex-1 text-center lg:text-left max-w-xl">
+                    <h1 className="hero-headline font-display text-5xl lg:text-6xl text-ink leading-[1.1] mb-6">
+                        Your inbox,{" "}
+                        <span className="italic text-accent">finally</span>{" "}
+                        under control.
+                    </h1>
 
-                    {/* Top Glow Overlay */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />
+                    <p className="hero-sub text-lg text-ink-light leading-relaxed mb-8 max-w-md mx-auto lg:mx-0">
+                        SortMail reads your threads, extracts what matters, and drafts replies — so you can focus on decisions, not email.
+                    </p>
 
-                    {/* Branding */}
-                    <div className="auth-item flex flex-col items-center mb-10">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center shadow-[0_0_20px_rgba(79,70,229,0.3)] mb-4 group-hover:scale-105 transition-transform duration-500">
-                            <Command size={28} className="text-white" />
+                    {/* Trust Indicators */}
+                    <div className="hero-trust flex flex-wrap justify-center lg:justify-start gap-4 text-sm text-muted">
+                        <div className="flex items-center gap-2">
+                            <Shield size={14} className="text-success" />
+                            <span>Read-only OAuth</span>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-400">
-                            SortMail
-                        </h1>
-                        <p className="text-zinc-500 text-sm mt-2 text-center max-w-[260px]">
-                            Your intelligent, AI-powered email workspace.
-                        </p>
+                        <div className="flex items-center gap-2">
+                            <Eye size={14} className="text-success" />
+                            <span>No auto-send</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Github size={14} className="text-success" />
+                            <span>Open source</span>
+                        </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="space-y-4">
+                    {/* Social Proof */}
+                    <div className="hero-trust mt-8 flex items-center gap-3 justify-center lg:justify-start">
+                        <div className="flex -space-x-2">
+                            {["SC", "LT", "DT"].map((init, i) => (
+                                <div
+                                    key={i}
+                                    className="w-8 h-8 rounded-full bg-paper-deep border-2 border-white flex items-center justify-center text-xs font-mono font-semibold text-ink-light"
+                                >
+                                    {init}
+                                </div>
+                            ))}
+                        </div>
+                        <span className="text-sm text-muted">Trusted by 1,200+ professionals</span>
+                    </div>
+                </div>
+
+                {/* ── Right: Auth Card ────────────────────────── */}
+                <div className="auth-card w-full max-w-[400px] card p-8">
+                    {/* Branding */}
+                    <div className="auth-item flex flex-col items-center mb-8">
+                        <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center mb-4">
+                            <Sparkles size={22} className="text-white" />
+                        </div>
+                        <h2 className="text-xl font-display text-ink">Get Started</h2>
+                        <p className="text-sm text-muted mt-1">Connect your email in 30 seconds.</p>
+                    </div>
+
+                    {/* OAuth Buttons */}
+                    <div className="space-y-3">
                         <button
-                            onClick={() => handleLogin('google')}
+                            onClick={() => handleLogin("google")}
                             disabled={loading !== null}
-                            className="auth-item w-full bg-white text-black hover:bg-zinc-200 disabled:opacity-70 disabled:cursor-not-allowed h-12 rounded-lg font-medium text-sm flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] group/btn relative overflow-hidden"
+                            className="auth-item w-full h-12 rounded-lg border border-border-light bg-white hover:bg-paper-mid disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm font-medium text-ink transition-all active:scale-[0.98]"
                         >
-                            {loading === 'google' ? (
-                                <Loader2 size={18} className="animate-spin text-zinc-600" />
+                            {loading === "google" ? (
+                                <Loader2 size={18} className="animate-spin text-muted" />
                             ) : (
                                 <>
                                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -90,12 +114,12 @@ export default function LoginPage() {
                         </button>
 
                         <button
-                            onClick={() => handleLogin('outlook')}
+                            onClick={() => handleLogin("outlook")}
                             disabled={loading !== null}
-                            className="auth-item w-full bg-[#18181B] border border-[#27272a] hover:border-zinc-600 text-zinc-200 hover:text-white disabled:opacity-70 disabled:cursor-not-allowed h-12 rounded-lg font-medium text-sm flex items-center justify-center gap-3 transition-all transform active:scale-[0.98]"
+                            className="auth-item w-full h-12 rounded-lg border border-border-light bg-white hover:bg-paper-mid disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm font-medium text-ink transition-all active:scale-[0.98]"
                         >
-                            {loading === 'outlook' ? (
-                                <Loader2 size={18} className="animate-spin" />
+                            {loading === "outlook" ? (
+                                <Loader2 size={18} className="animate-spin text-muted" />
                             ) : (
                                 <>
                                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -107,32 +131,33 @@ export default function LoginPage() {
                         </button>
                     </div>
 
-                    <div className="auth-item mt-8 pt-8 border-t border-white/5">
-                        <div className="flex items-center justify-center gap-6 text-xs text-zinc-500">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 size={14} className="text-emerald-500/70" />
-                                <span>SOC2 Compliant</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 size={14} className="text-emerald-500/70" />
-                                <span>End-to-End Encrypted</span>
-                            </div>
-                        </div>
+                    {/* Divider */}
+                    <div className="auth-item flex items-center gap-3 my-6">
+                        <div className="flex-1 h-px bg-border-light" />
+                        <span className="text-xs text-muted font-mono">OR</span>
+                        <div className="flex-1 h-px bg-border-light" />
                     </div>
 
-                    <div className="auth-item mt-6 text-center">
-                        <p className="text-[10px] text-zinc-600">
-                            By continuing, you agree to our <Link href="#" className="underline hover:text-zinc-400">Terms</Link> and <Link href="#" className="underline hover:text-zinc-400">Privacy Policy</Link>.
-                        </p>
+                    {/* Magic Link */}
+                    <div className="auth-item">
+                        <input
+                            type="email"
+                            placeholder="Enter your work email"
+                            className="w-full h-12 px-4 rounded-lg border border-border-light bg-white text-sm text-ink placeholder:text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all"
+                        />
+                        <button className="btn-primary w-full mt-3 h-12">
+                            Send Magic Link
+                            <ArrowRight size={16} />
+                        </button>
                     </div>
 
+                    {/* Footer */}
+                    <p className="auth-item text-center text-xs text-muted mt-6">
+                        By continuing, you agree to our{" "}
+                        <Link href="#" className="underline hover:text-ink-light">Terms</Link> and{" "}
+                        <Link href="#" className="underline hover:text-ink-light">Privacy Policy</Link>.
+                    </p>
                 </div>
-            </div>
-
-            {/* Corner Info */}
-            <div className="absolute bottom-8 right-8 text-right hidden sm:block opacity-40 hover:opacity-100 transition-opacity">
-                <p className="text-xs text-zinc-500 font-mono">Build v1.0.4</p>
-                <p className="text-xs text-zinc-600">SortMail Inc.</p>
             </div>
         </main>
     );
