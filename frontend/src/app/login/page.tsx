@@ -6,9 +6,20 @@ export default function LoginPage() {
     const [loading, setLoading] = useState<"google" | "outlook" | null>(null);
 
     const handleGoogleLogin = async () => {
-        setLoading("google");
-        // TODO: Redirect to backend OAuth endpoint
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
+        try {
+            setLoading("google");
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`);
+            const data = await response.json();
+            if (data.auth_url) {
+                window.location.href = data.auth_url;
+            } else {
+                console.error("No auth_url returned", data);
+                setLoading(null);
+            }
+        } catch (error) {
+            console.error("Failed to initiate Google login", error);
+            setLoading(null);
+        }
     };
 
     const handleOutlookLogin = async () => {
