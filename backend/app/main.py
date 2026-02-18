@@ -15,6 +15,8 @@ async def lifespan(app: FastAPI):
     # Startup
     print(f"🚀 Starting SortMail API v{settings.VERSION}")
     print(f"📧 Environment: {settings.ENVIRONMENT}")
+    from core.storage.database import init_db
+    await init_db()
     yield
     # Shutdown
     print("👋 Shutting down SortMail API")
@@ -53,9 +55,10 @@ async def health():
     return {"status": "healthy"}
 
 
-# Import and include routers (uncomment as implemented)
-# from api.routes import auth, emails, threads, tasks, drafts, reminders
-# app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+# Import and include routers
+from api.routes import auth
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+# from api.routes import emails, threads, tasks, drafts, reminders
 # app.include_router(emails.router, prefix="/api/emails", tags=["emails"])
 # app.include_router(threads.router, prefix="/api/threads", tags=["threads"])
 # app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])
