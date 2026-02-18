@@ -9,6 +9,23 @@ export default function LoginPage() {
     const containerRef = useRef<HTMLDivElement>(null);
     const [loading, setLoading] = useState<"google" | "outlook" | null>(null);
 
+    const handleGoogleLogin = async () => {
+        try {
+            setLoading("google");
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`);
+            const data = await response.json();
+            if (data.auth_url) {
+                window.location.href = data.auth_url;
+            } else {
+                console.error("No auth_url returned", data);
+                setLoading(null);
+            }
+        } catch (error) {
+            console.error("Failed to initiate Google login", error);
+            setLoading(null);
+        }
+    };
+
     useEffect(() => {
         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 

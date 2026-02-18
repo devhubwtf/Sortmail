@@ -6,7 +6,10 @@ All environment variables and settings.
 
 from typing import List
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
@@ -21,7 +24,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
     
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: List[str] = ["*"]
     
     # Database
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/sortmail"
@@ -30,8 +33,8 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     
     # OAuth - Google
-    GOOGLE_CLIENT_ID: str = ""
-    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET")
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/auth/google/callback"
     
     # OAuth - Microsoft

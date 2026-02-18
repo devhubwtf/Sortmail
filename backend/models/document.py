@@ -21,8 +21,8 @@ class Document(Base):
     # Vector index reference
     vector_index_id = Column(String, nullable=False)
     
-    # Metadata for filtering
-    metadata = Column(JSONB, default={})
+    # Metadata
+    doc_metadata = Column(JSONB, default={})
     
     # Timestamps
     indexed_at = Column(DateTime, default=datetime.utcnow)
