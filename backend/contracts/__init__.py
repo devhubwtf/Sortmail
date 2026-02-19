@@ -58,7 +58,11 @@ from .workflow import (
     # Internal types
     Placeholder,
 )
-from .dashboard import BriefingDTO
+from .dashboard import (
+    BriefingDTO,
+    DashboardStats,
+    DashboardData,
+)
 
 # =============================================================================
 # EXPORTS
@@ -86,6 +90,8 @@ __all__ = [
     "CalendarSuggestionV1",
     "WaitingForDTOv1",
     "BriefingDTO",
+    "DashboardStats",
+    "DashboardData",
     
     # === ENUMS ===
     "IntentType",

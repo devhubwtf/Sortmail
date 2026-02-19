@@ -17,20 +17,15 @@ from api.dependencies import get_current_user
 from models.user import User
 from models.thread import Thread
 from api.routes.threads import ThreadListItem
-from contracts import TaskDTOv1, BriefingDTO
+from contracts import (
+    TaskDTOv1, 
+    BriefingDTO,
+    DashboardStats,
+    DashboardData
+)
 from models.task import Task, TaskStatus
 
 router = APIRouter()
-
-class DashboardStats(BaseModel):
-    unread: int
-    unread_delta: str
-    urgent: int
-    tasks_due: int
-    awaiting_reply: int
-    briefing: BriefingDTO
-    recent_threads: List[ThreadListItem]
-    priority_tasks: List[TaskDTOv1]
 
 @router.get("/stats", response_model=DashboardData)
 async def get_dashboard_stats(
@@ -141,6 +136,7 @@ async def get_dashboard_stats(
             awaiting_reply=awaiting_reply_count
         ),
         briefing=briefing,
-        recent_threads=recent_threads,
-        priority_tasks=priority_tasks
+        # Convert Pydantic models to dicts because Contract uses List[dict] to avoid circular imports
+        recent_threads=[t.dict() for t in recent_threads],
+        priority_tasks=[t.dict() for t in priority_tasks]
     )
