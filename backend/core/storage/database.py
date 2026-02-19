@@ -33,12 +33,16 @@ db_url_obj = make_url(original_url)
 
 # SSL Context for Production (Railway/Supabase usually need this)
 connect_args = {}
-if settings.ENVIRONMENT == "production" or "railway" in settings.DATABASE_URL or "railway" in (db_url_obj.host or ""):
+if settings.ENVIRONMENT == "production" or "railway" in settings.DATABASE_URL or "railway" in (db_url_obj.host or "") or "supabase" in (db_url_obj.host or ""):
     # Create a custom SSL context that ignores hostname verification if needed
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
     connect_args["ssl"] = ctx
+    
+    # IMPORTANT: Disable prepared statements for Supabase/pgbouncer transaction pooling
+    # This fixes "DuplicatePreparedStatementError"
+    connect_args["statement_cache_size"] = 0
     
     # IMPORTANT: Remove 'sslmode' or other query params that might conflict with asyncpg
     # asyncpg does not support 'sslmode' in the query string when using connect_args['ssl']
