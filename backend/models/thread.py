@@ -5,7 +5,7 @@ SQLAlchemy model for email threads.
 """
 
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Integer, Text, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, Text, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 
 from core.storage import Base
