@@ -46,39 +46,38 @@ is_production = (
 if is_production:
     print("🚀 Configuring database for PRODUCTION/CLOUD environment")
     
-    # 1. SSL Context (Ignore hostname for internal routing)
+    # 1. SSL Context (Necessary for Supabase/Railway)
+    # We use a custom context to avoid "certificate verify failed" or hostname mismatches
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
     connect_args["ssl"] = ctx
     
-    # 2. Disable Prepared Statements (CRITICAL for Supabase/pgbouncer transaction mode)
-    print("🛠️  Disabling prepared statements (statement_cache_size=0)")
-    connect_args["statement_cache_size"] = 0
-    
-    # 3. Strip 'sslmode' query param & Add 'statement_cache_size' to query just in case
+    # 2. Check for Transaction Pooler (PgBouncer default port is 6543 on Supabase)
+    # If using port 6543, we MUST disable prepared statements.
+    # If using port 5432 (Direct), we can keep them enabled for better performance.
+    if db_url_obj.port == 6543:
+        print("🛠️  Detected PgBouncer (Port 6543). Disabling prepared statements.")
+        connect_args["statement_cache_size"] = 0
+    else:
+        print(f"⚡ Detected Direct Connection (Port {db_url_obj.port}). Prepared statements enabled.")
+
+    # 3. Strip 'sslmode' query param to avoid conflicts with our manual SSL context
     query_params = dict(db_url_obj.query)
     if "sslmode" in query_params:
-        print("🧹 Removing 'sslmode' query parameter")
+        print("🧹 Removing 'sslmode' query parameter (handled manually)")
         del query_params["sslmode"]
     
-    # Some setups prefer it in the query
-    # query_params["statement_cache_size"] = "0" 
-    # SQLAlchemy sometimes warns about this, but passing it in connect_args is standard.
-    # FORCE IT into the URL query as well, just in case connect_args is dropping it.
-    query_params["statement_cache_size"] = "0"
-    
+    # Ensure no conflicting args in query if we set them in connect_args
+    if "statement_cache_size" in query_params:
+         del query_params["statement_cache_size"]
+
     db_url_obj = db_url_obj._replace(query=query_params)
-    
-    # 4. Force SQLAlchemy to not use prepared statements for the ping
-    # pool_pre_ping=True uses "SELECT 1", which might be prepared. 
-    # Let's try disabling pool_pre_ping TEMPORARILY to see if the app starts.
-    # If it starts, then the pre-ping is the culprit.
     
 else:
     print("💻 Configuring database for LOCAL environment")
 
-print(f"⚙️  Final connect_args: {connect_args}")
+print(f"⚙️  Final connect_args: keys={list(connect_args.keys())}")
 
 # Create async engine
 # Create async engine
