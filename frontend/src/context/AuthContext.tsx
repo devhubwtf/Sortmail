@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Define the User type based on backend response
@@ -18,6 +18,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: () => void; // Redirects to Google
     logout: () => void;
+    verifyToken: (token: string) => Promise<boolean>; // Exposed for AuthTokenListener
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,14 +26,42 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // API URL from env or default
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://sortmail-production.up.railway.app";
 
+// --- Helper Component for URL Token Handling ---
+function AuthTokenHandler() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const { verifyToken } = useAuth();
+    const [processed, setProcessed] = useState(false);
+
+    useEffect(() => {
+        const urlToken = searchParams?.get("token");
+
+        if (urlToken && !processed) {
+            console.log("🔗 Token found in URL via Handler, authenticating...");
+            setProcessed(true); // Prevent double firing
+
+            // Save immediately
+            localStorage.setItem("sortmail_token", urlToken);
+
+            verifyToken(urlToken).then((success) => {
+                if (success) {
+                    console.log("✅ OAuth Login Success (Handler)");
+                    router.replace("/dashboard");
+                }
+            });
+        }
+    }, [searchParams, verifyToken, router, processed]);
+
+    return null; // This component handles logic only
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
-    const searchParams = useSearchParams();
 
     // Fetch user from backend using token
-    const fetchUser = async (token: string) => {
+    const verifyToken = async (token: string) => {
         try {
             const res = await fetch(`${API_URL}/api/auth/me`, {
                 headers: {
@@ -56,36 +85,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    // Initial Session Check
     useEffect(() => {
-        const initAuth = async () => {
-            // 1. Check URL for token (OAuth callback)
-            const urlToken = searchParams?.get("token");
-
-            if (urlToken) {
-                console.log("🔗 Token found in URL, authenticating...");
-                localStorage.setItem("sortmail_token", urlToken);
-
-                // Fetch user immediately
-                const success = await fetchUser(urlToken);
-                if (success) {
-                    console.log("✅ OAuth Login Success");
-                    router.replace("/dashboard"); // Clean URL and redirect
-                } else {
-                    setIsLoading(false);
-                }
-            }
-            // 2. Check LocalStorage (Session restore)
-            else {
-                const storedToken = localStorage.getItem("sortmail_token");
-                if (storedToken) {
-                    await fetchUser(storedToken);
-                }
+        const initSession = async () => {
+            const storedToken = localStorage.getItem("sortmail_token");
+            if (storedToken) {
+                await verifyToken(storedToken);
             }
             setIsLoading(false);
         };
-
-        initAuth();
-    }, [searchParams, router]);
+        initSession();
+    }, []);
 
     // Redirect to Backend OAuth endpoint
     const login = () => {
@@ -95,11 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = () => {
         localStorage.removeItem("sortmail_token");
         setUser(null);
-        router.push("/login"); // or home
+        router.push("/login");
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, verifyToken }}>
+            <Suspense fallback={null}>
+                <AuthTokenHandler />
+            </Suspense>
             {children}
         </AuthContext.Provider>
     );
