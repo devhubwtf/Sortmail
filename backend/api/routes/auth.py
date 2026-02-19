@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from core.storage.database import get_db
-from models.user import User, EmailProvider
+from models.user import User, UserStatus, EmailProvider
 from models.connected_account import ConnectedAccount, ProviderType
 from core.auth import oauth_google, jwt
 from core.redis import get_redis
