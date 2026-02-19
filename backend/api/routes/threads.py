@@ -34,6 +34,7 @@ from core.storage.database import get_db
 from api.dependencies import get_current_user
 from models.user import User
 from models.thread import Thread
+from core.credits.credit_service import CreditService, InsufficientCreditsError, RateLimitExceededError
 
 @router.get("/", response_model=List[ThreadListItem])
 async def list_threads(
@@ -206,11 +207,39 @@ async def get_thread(
 
 
 @router.post("/{thread_id}/refresh")
-async def refresh_thread(thread_id: str):
+async def refresh_thread(
+    thread_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """
-    Re-process thread intelligence.
+    Re-process thread intelligence. (Cost: 2 credits)
     
     Useful after new emails arrive or if user wants updated analysis.
     """
-    # TODO: Trigger re-analysis
-    return {"thread_id": thread_id, "refreshed": True}
+    OPERATION_TYPE = "thread_summary"
+    
+    # 1. Check Balance
+    if not await CreditService.check_balance(db, current_user.id, OPERATION_TYPE):
+         raise HTTPException(status_code=402, detail="Insufficient credits.")
+
+    try:
+        # TODO: Trigger re-analysis (Call Celery task or Intelligence Engine)
+        
+        # 2. Deduct Credits
+        await CreditService.deduct_credits(
+            db, user_id=current_user.id, operation_type=OPERATION_TYPE,
+            metadata={"thread_id": thread_id, "action": "refresh"}
+        )
+        await db.commit()
+        
+        return {"thread_id": thread_id, "refreshed": True}
+    except InsufficientCreditsError as e:
+        await db.rollback()
+        raise HTTPException(status_code=402, detail=str(e))
+    except RateLimitExceededError as e:
+        await db.rollback()
+        raise HTTPException(status_code=429, detail=str(e))
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

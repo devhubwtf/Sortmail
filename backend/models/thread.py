@@ -5,10 +5,17 @@ SQLAlchemy model for email threads.
 """
 
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Integer, Text, ForeignKey, Boolean
+from sqlalchemy import Column, String, DateTime, Integer, Text, ForeignKey, Boolean, Enum, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, ARRAY
+import enum
 
-from core.storage import Base
+from core.storage.database import Base
+
+class IntelStatus(str, enum.Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class Thread(Base):

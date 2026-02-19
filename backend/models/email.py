@@ -5,9 +5,10 @@ SQLAlchemy model for raw email storage (if needed).
 """
 
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Text, Boolean, ForeignKey
+from sqlalchemy import Column, String, DateTime, Text, Boolean, ForeignKey, Integer
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 
-from core.storage import Base
+from core.storage.database import Base
 
 
 class Email(Base):
@@ -19,21 +20,34 @@ class Email(Base):
     thread_id = Column(String, ForeignKey("threads.id"), nullable=False, index=True)
     
     # Email data
-    external_id = Column(String, nullable=False)  # Provider's message ID
-    from_address = Column(String, nullable=False)
-    to_addresses = Column(Text)  # JSON array
-    cc_addresses = Column(Text)  # JSON array
-    subject = Column(String)
-    snippet = Column(Text)  # Preview text
-    body_text = Column(Text)
-    body_html = Column(Text)
+    # Email data
+    external_id = Column(String, nullable=False, index=True)  # Provider's message ID
+    sender = Column(String, nullable=False, index=True)
+    sender_name = Column(String, nullable=True)
+    recipients = Column(JSONB, nullable=False) # array of {email, name, type}
     
-    # Flags
-    is_read = Column(Boolean, default=False)
-    is_starred = Column(Boolean, default=False)
+    subject = Column(String, nullable=False)
+    body_plain = Column(Text, nullable=True)
+    body_html = Column(Text, nullable=True)
+    snippet = Column(String, nullable=True)
+    
+    # Metadata
+    is_reply = Column(Boolean, default=False)
+    is_forward = Column(Boolean, default=False)
+    in_reply_to = Column(String, nullable=True)
+    references = Column(ARRAY(String), default=[])
+    
+    has_attachments = Column(Boolean, default=False)
+    attachment_count = Column(Integer, default=0)
+    total_attachment_size_bytes = Column(Integer, default=0) # Using Integer for BigInt if sufficient, or BigInteger
+    
     is_from_user = Column(Boolean, default=False)
+    headers = Column(JSONB, nullable=True)
+    metadata_json = Column(JSONB, default={})
     
     # Timestamps
-    sent_at = Column(DateTime, nullable=False)
-    received_at = Column(DateTime)
+    received_at = Column(DateTime, nullable=False, index=True)
+    sent_at = Column(DateTime, nullable=True)
+    deleted_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

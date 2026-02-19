@@ -17,7 +17,7 @@ from api.dependencies import get_current_user
 from models.user import User
 from models.thread import Thread
 from api.routes.threads import ThreadListItem
-from contracts import TaskDTOv1
+from contracts import TaskDTOv1, BriefingDTO
 from models.task import Task, TaskStatus
 
 router = APIRouter()
