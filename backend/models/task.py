@@ -13,11 +13,18 @@ from core.storage.database import Base
 
 
 class TaskStatus(str, enum.Enum):
-    PENDING = "pending"  # Added to match usage
+    PENDING = "pending"
     TODO = "todo"
     IN_PROGRESS = "in_progress"
     DONE = "done"
     CANCELLED = "cancelled"
+
+
+class TaskType(str, enum.Enum):
+    GENERAL = "general"
+    EMAIL = "email"
+    FOLLOW_UP = "follow_up"
+    MEETING = "meeting"
 
 
 class PriorityLevel(str, enum.Enum):
@@ -43,6 +50,7 @@ class Task(Base):
     title = Column(String, nullable=False)
     description = Column(Text)
     status = Column(Enum(TaskStatus), default=TaskStatus.PENDING)
+    task_type = Column(Enum(TaskType), default=TaskType.GENERAL)
     
     # Priority
     priority_level = Column(String, nullable=True) # urgent, high, medium, low
