@@ -105,7 +105,9 @@ async def google_callback(
         raise HTTPException(status_code=400, detail="Internal authentication error")
     finally:
         # Prevent replay
-        await redis.delete(state_key)
+        # DATA RACING DEBUGGING: Temporarily commenting out delete to handle potential double-requests/retries
+        # await redis.delete(state_key)
+        pass
     
     # 4. Get User Info
     try:
@@ -118,27 +120,39 @@ async def google_callback(
     enc_refresh_token = encrypt_token(tokens.refresh_token) if tokens.refresh_token else None
         
     # 6. Find or Create User
-    stmt = select(User).where(User.email == user_info.email)
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
-    
-    if not user:
-        user = User(
-            id=user_info.id,
-            email=user_info.email,
-            name=user_info.name,
-            picture_url=user_info.picture,
-            provider=EmailProvider.GMAIL,
+    try:
+        stmt = select(User).where(User.email == user_info.email)
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            user = User(
+                id=user_info.id,
+                email=user_info.email,
+                name=user_info.name,
+                picture_url=user_info.picture,
+                provider=EmailProvider.GMAIL,
             access_token=enc_access_token, # Storing encrypted
-            created_at=datetime.utcnow(),
-            is_active=True
-        )
-        db.add(user)
-        await db.flush()
-    else:
-        user.name = user_info.name
-        user.picture_url = user_info.picture
-        # user.access_token = enc_access_token # Consider if we want to update this on user model too
+                created_at=datetime.utcnow(),
+                is_active=True
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+            
+        else:
+            user.name = user_info.name
+            user.picture_url = user_info.picture
+            # user.access_token = enc_access_token # Consider if we want to update this on user model too
+    except Exception as e:
+        logger.error(f"❌ User DB Error: {e}")
+        # Explicit check for missing column to help user debug
+        if "UndefinedColumnError" in str(e) or "column \"updated_at\" does not exist" in str(e):
+             raise HTTPException(
+                status_code=500, 
+                detail="DATABASE CONFIG ERROR: Missing 'updated_at' column. Please run the migration script provided."
+            )
+        raise HTTPException(status_code=500, detail="Database error during user creation")
     
     # 7. Update Connected Account
     stmt = select(ConnectedAccount).where(
