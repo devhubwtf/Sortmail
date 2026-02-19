@@ -113,13 +113,14 @@ async def get_dashboard_stats(
             user_id=t.user_id,
             title=t.title,
             description=t.description,
-            task_type=t.task_type,
-            priority=t.priority,
+            task_type=t.task_type or "other", # Default to other
+            # Map model fields to contract fields with safe defaults
+            priority=t.priority_level or "can_wait", # Default to can_wait
             priority_score=t.priority_score,
-            priority_explanation=t.priority_explanation,
-            effort=t.effort,
-            deadline=t.deadline,
-            deadline_source=t.deadline_source,
+            priority_explanation=t.metadata_json.get("priority_explanation", ""), 
+            effort=t.metadata_json.get("effort") or "quick", # Default to quick
+            deadline=t.due_date, # Model: due_date
+            deadline_source=t.metadata_json.get("deadline_source"), # In metadata
             status=t.status,
             created_at=t.created_at,
             updated_at=t.updated_at
