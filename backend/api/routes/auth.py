@@ -21,6 +21,7 @@ from models.connected_account import ConnectedAccount, ProviderType
 from core.auth import oauth_google, jwt
 from core.redis import get_redis
 from core.encryption import encrypt_token
+from api.dependencies import get_current_user as get_current_user_dep
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -208,11 +209,9 @@ async def outlook_callback(code: str):
 
 
 @router.get("/me")
-async def get_current_user(token: str = Depends(jwt.verify_token)):
+async def get_current_user(user: User = Depends(get_current_user_dep)):
     """Get current authenticated user."""
-    if not token:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return token
+    return user
 
 
 @router.post("/logout")
