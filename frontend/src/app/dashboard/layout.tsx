@@ -1,18 +1,37 @@
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
+"use client";
+
+import React, { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    return (
-        <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-            <Sidebar />
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <Header />
-                <main className="flex-1 overflow-auto p-6">{children}</main>
+    const { isAuthenticated, isLoading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.push("/login");
+        }
+    }, [isLoading, isAuthenticated, router]);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-paper">
+                <div className="animate-pulse flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-paper-mid"></div>
+                    <div className="text-muted text-sm font-medium">Loading Workspace...</div>
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
+
+    if (!isAuthenticated) {
+        return null; // Will redirect via useEffect
+    }
+
+    return <>{children}</>;
 }

@@ -9,7 +9,7 @@ Provides realistic mock data for BOUNDARY CONTRACTS:
 Use these for parallel team development and integration testing.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from .ingestion import AttachmentRef, EmailMessage, EmailThreadV1
 from .intelligence import (
     IntentType, ExtractedDeadline, ExtractedEntity, 
@@ -60,7 +60,8 @@ Let me know if you have any questions.
 
 Best,
 Sarah""",
-        sent_at=datetime.utcnow() - timedelta(hours=hours_ago),
+        sent_at=datetime.now(timezone.utc) - timedelta(hours=hours_ago),
+        received_at=datetime.now(timezone.utc) - timedelta(hours=hours_ago) + timedelta(minutes=1),
         is_from_user=is_from_user,
     )
 
@@ -77,7 +78,7 @@ def create_mock_email_thread() -> EmailThreadV1:
             create_mock_email_message(is_from_user=False, hours_ago=2),
         ],
         attachments=[create_mock_attachment()],
-        last_updated=datetime.utcnow() - timedelta(hours=2),
+        last_updated=datetime.now(timezone.utc) - timedelta(hours=2),
         provider="gmail",
     )
 
@@ -90,7 +91,7 @@ def create_mock_deadline() -> ExtractedDeadline:
     """Create a realistic extracted deadline."""
     return ExtractedDeadline(
         raw_text="by Friday EOD",
-        normalized=datetime.utcnow() + timedelta(days=3),
+        normalized=datetime.now(timezone.utc) + timedelta(days=3),
         confidence=0.92,
         source="msg-002",
     )
@@ -140,7 +141,8 @@ def create_mock_thread_intel() -> ThreadIntelV1:
             "State your decision",
         ],
         model_version="gemini-1.5-pro",
-        processed_at=datetime.utcnow(),
+        processed_at=datetime.now(timezone.utc),
+        schema_version="1.0",
     )
 
 
@@ -161,11 +163,11 @@ def create_mock_task() -> TaskDTOv1:
         priority_score=85,
         priority_explanation="High: Key client + deadline Friday + contract value significant",
         effort=EffortLevel.QUICK,
-        deadline=datetime.utcnow() + timedelta(days=3),
+        deadline=datetime.now(timezone.utc) + timedelta(days=3),
         deadline_source="Email: 'by Friday EOD'",
         status=TaskStatus.PENDING,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
 
@@ -195,8 +197,9 @@ Best regards""",
         has_unresolved_placeholders=True,
         references_attachments=True,
         references_deadlines=True,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
         model_version="gemini-1.5-pro",
+        schema_version="1.0",
     )
 
 
@@ -207,14 +210,14 @@ def create_mock_calendar_suggestion() -> CalendarSuggestionV1:
         thread_id="thread-550e8400-e29b-41d4-a716-446655440000",
         user_id="user-001",
         title="Contract review deadline",
-        suggested_time=datetime.utcnow() + timedelta(days=3, hours=-2),
+        suggested_time=datetime.now(timezone.utc) + timedelta(days=3, hours=-2),
         duration_minutes=30,
         location=None,
         extracted_from="by Friday EOD",
         confidence=0.85,
         is_accepted=False,
         is_dismissed=False,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
     )
 
 
@@ -224,7 +227,7 @@ def create_mock_waiting_for() -> WaitingForDTOv1:
         waiting_id="wait-001",
         thread_id="thread-other-123",
         user_id="user-001",
-        last_sent_at=datetime.utcnow() - timedelta(days=5),
+        last_sent_at=datetime.now(timezone.utc) - timedelta(days=5),
         days_waiting=5,
         recipient="john@bigclient.com",
         reminded=False,

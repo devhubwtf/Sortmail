@@ -2,83 +2,589 @@
 @tailwind components;
 @tailwind utilities;
 
-/* SortMail Global Styles */
-
-:root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-  --muted: #6b7280;
-  --border: #e5e7eb;
-  --card: #ffffff;
-  --card-foreground: #1a1a1a;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --muted: #9ca3af;
-    --border: #374151;
-    --card: #1f2937;
-    --card-foreground: #ededed;
+    /* ─ Core Palette (Paper/Ink Aesthetic) ────────────────── */
+    --ink: #0a0a0f;
+    --paper: #f5f2eb;
+    --accent: #e8440a;
+    --accent-hover: #d13d09;
+    --accent-soft: #fde8e8;
+    --accent2: #2563d4;
+    --muted: #6b6b7a;
+    --border: #d4cfc4;
+
+    /* ─ Surface Colors ─────────────────────────────────────── */
+    --surface: #ffffff;
+    --surface-card: #ffffff;
+    --surface-elevated: #ffffff;
+    --paper-mid: #f0ede6;
+    --paper-deep: #e6e3dc;
+
+    /* ─ Semantic/Action Colors ─────────────────────────────── */
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --info: #2563d4;
+    --ai: #5b21b6;
+    --ai-purple: #5b21b6;
+    --ai-purple-soft: #ede9fe;
+
+    /* ─ Priority Tags ──────────────────────────────────────── */
+    --tag-urgent: #ef4444;
+    --tag-high: #f97316;
+    --tag-medium: #eab308;
+    --tag-low: #22c55e;
+
+    /* ─ Typography ─────────────────────────────────────────── */
+    --ff-display: var(--font-fraunces), serif;
+    --ff-body: var(--font-syne), sans-serif;
+    --ff-mono: var(--font-jetbrains), monospace;
+
+    /* ─ Layout Tokens ──────────────────────────────────────── */
+    --sidebar-w: 240px;
+    --sidebar-collapsed: 64px;
+    --sidebar-col: 64px;
+    --sidebar-mobile-w: 280px;
+    --topbar-h: 56px;
+    --panel-w: 380px;
+
+    /* ─ Spacing & Radius ────────────────────────────────────── */
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 40px;
+    --sp-xxl: 64px;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
+
+    /* ─ Shadcn Mappings ────────────────────────────────────── */
+    --background: var(--paper);
+    --foreground: var(--ink);
+    --card: #ffffff;
+    --card-foreground: var(--ink);
+    --popover: #ffffff;
+    --popover-foreground: var(--ink);
+    --primary: var(--accent);
+    --primary-foreground: #ffffff;
+    --secondary: var(--paper-mid);
+    --secondary-foreground: var(--ink);
+    --muted-foreground: var(--muted);
+    --destructive: var(--danger);
+    --destructive-foreground: #ffffff;
+    --border-light: var(--border);
+    --input: var(--border);
+    --ring: var(--accent);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--ff-body);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--ff-display);
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  code,
+  pre,
+  .mono {
+    font-family: var(--ff-mono);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: "Inter", system-ui, sans-serif;
-}
-
-/* Scrollbar styling */
+/* ─ Custom Scrollbar ──────────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--border);
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 4px;
+  background: var(--border);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+  background: var(--muted);
 }
 
-/* Priority badges */
+/* ─ Animations (from spec) ────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer components {
-  .priority-badge {
-    @apply px-2 py-1 rounded-full text-xs font-medium;
-  }
-  
-  .priority-do-now {
-    @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
-  }
-  
-  .priority-do-today {
-    @apply bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200;
-  }
-  
-  .priority-can-wait {
-    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
-  }
-  
-  /* Card component */
+
+  /* ═ Card Surfaces (from spec) ════════════════════════════ */
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: box-shadow 200ms ease-out, transform 200ms ease-out;
   }
-  
-  /* Button variants */
+
+  .card:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* ═ Buttons (from spec) ══════════════════════════════════ */
   .btn-primary {
-    @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--accent);
+    color: white;
+    font-family: var(--ff-body);
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all 200ms ease-out;
   }
-  
+
+  .btn-primary:hover {
+    background: #d13d09;
+    transform: scale(1.02);
+  }
+
   .btn-secondary {
-    @apply bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--ff-body);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 200ms ease-out;
+  }
+
+  .btn-secondary:hover {
+    background: var(--paper);
+    border-color: var(--muted);
+  }
+
+  /* ═ Priority Badges (exact spec colors) ═════════════════ */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-urgent {
+    background: #fef2f2;
+    color: var(--tag-urgent);
+    border: 1px solid #fecaca;
+  }
+
+  .badge-high {
+    background: #fff7ed;
+    color: var(--tag-high);
+    border: 1px solid #fed7aa;
+  }
+
+  .badge-medium {
+    background: #fefce8;
+    color: #854d0e;
+    border: 1px solid #fef08a;
+  }
+
+  .badge-low {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  .badge-ai {
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
+  }
+
+  /* ═ Priority Badge Variants ═════════════════════════════ */
+  .priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: var(--radius-full);
+  }
+
+  .priority-urgent {
+    background: #fef2f2;
+    color: var(--tag-urgent);
+    border: 1px solid #fecaca;
+  }
+
+  .priority-high {
+    background: #fff7ed;
+    color: var(--tag-high);
+    border: 1px solid #fed7aa;
+  }
+
+  .priority-medium {
+    background: #fefce8;
+    color: #854d0e;
+    border: 1px solid #fef08a;
+  }
+
+  .priority-low {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  /* ═ AI Badge ════════════════════════════════════════════ */
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: #ede9fe;
+    color: var(--color-ai);
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    border: 1px solid #ddd6fe;
+  }
+
+  /* ═ Email Card ═══════════════════════════════════════════ */
+  .email-card {
+    display: flex;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 200ms ease-out;
+  }
+
+  .email-card:hover {
+    background: rgba(245, 242, 235, 0.5);
+  }
+
+  .email-card.unread {
+    background: #ffffff;
+  }
+
+  .email-card.unread .email-card-sender {
+    font-weight: 700;
+  }
+
+  /* ═ Skeleton Loading ═════════════════════════════════════ */
+  .skeleton {
+    background: linear-gradient(90deg, var(--paper) 25%, #e6e3dc 50%, var(--paper) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ═ Glass Panel ══════════════════════════════════════════ */
+  .glass-panel {
+    background: rgba(255, 253, 245, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+  }
+
+  /* ═ Sidebar Nav Item ═════════════════════════════════════ */
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 200ms ease-out;
+  }
+
+  .nav-item:hover {
+    background: rgba(245, 242, 235, 0.5);
+    color: var(--ink);
+  }
+
+  .nav-item.active {
+    background: var(--paper);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ═ Stat Card ════════════════════════════════════════════ */
+  .stat-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+
+  .stat-card-value {
+    font-family: var(--ff-display);
+    font-size: 32px;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .stat-card-label {
+    font-size: 10px;
+    font-family: var(--ff-mono);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 8px;
+  }
+
+  .stat-card-delta {
+    font-size: 12px;
+    font-family: var(--ff-mono);
+    margin-top: 4px;
+  }
+
+  .stat-card-delta.up {
+    color: var(--color-success);
+  }
+
+  .stat-card-delta.down {
+    color: var(--color-danger);
+  }
+
+  /* ═ Section Label ════════════════════════════════════════ */
+  .section-label {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* ═ Big Label (from spec) ════════════════════════════════ */
+  .big-label {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  /* ═ Wireframe Block (from spec) ══════════════════════════ */
+  .wireframe-block {
+    background: var(--wire-bg);
+    border: 2px solid var(--wire-border);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 32px;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    line-height: 1.8;
+  }
+
+  /* ═ Diagram Card (from spec) ═════════════════════════════ */
+  .diagram-card {
+    background: var(--mono-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #2a2a4a;
+  }
+
+  .diagram-card-header {
+    padding: 12px 20px;
+    background: #14143a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #2a2a4a;
+  }
+
+  .diagram-card pre {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    line-height: 1.7;
+    padding: 20px;
+    color: var(--mono-text);
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* ═ Callout (from spec) ══════════════════════════════════ */
+  .callout {
+    background: #fff8f6;
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 20px 0;
+    font-family: var(--ff-mono);
+    color: var(--ink);
+  }
+
+  .callout strong {
+    color: var(--accent);
+  }
+
+  /* ═ Divider (from spec) ══════════════════════════════════ */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  /* ═ Mobile Layout Utilities ══════════════════════════════ */
+  .mobile-only {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .mobile-only {
+      display: block;
+    }
+
+    .desktop-only {
+      display: none;
+    }
+
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 300ms ease;
+    }
+
+    .drawer-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: var(--sidebar-mobile-w);
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
   }
 }

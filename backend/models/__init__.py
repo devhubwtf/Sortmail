@@ -7,10 +7,10 @@ from .attachment import Attachment
 from .draft import Draft, ToneType
 from .connected_account import ConnectedAccount, ProviderType
 from .document import Document
-from .waiting_for import WaitingFor
 from .reminder import Reminder
 from .vip_domain import VIPDomain
 from .calendar_suggestion import CalendarSuggestion
+from .credits import UserCredits, CreditTransaction, CreditPricing, CreditPackage
 
 __all__ = [
     # Users & Auth
@@ -33,9 +33,12 @@ __all__ = [
     "Draft",
     "ToneType",
     # Follow-ups
-    "WaitingFor",
     "Reminder",
     "VIPDomain",
     "CalendarSuggestion",
+    # Credits
+    "UserCredits",
+    "CreditTransaction",
+    "CreditPricing",
+    "CreditPackage",
 ]
-

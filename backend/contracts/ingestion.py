@@ -21,6 +21,10 @@ class AttachmentRef(BaseModel):
     attachment_id: str = Field(
         description="Internal UUID for this attachment"
     )
+    email_id: str = Field(
+        default="",
+        description="ID of the email this attachment belongs to (msg-{provider_id})"
+    )
     filename: str = Field(
         description="Smart/contextual filename (e.g., Contract_ClientA_2026.pdf)"
     )
@@ -31,6 +35,7 @@ class AttachmentRef(BaseModel):
         description="MIME type (e.g., application/pdf)"
     )
     storage_path: str = Field(
+        default="",
         description="Path where file is stored (local or cloud)"
     )
     size_bytes: int = Field(
@@ -62,12 +67,23 @@ class EmailMessage(BaseModel):
     body_text: str = Field(
         description="Plain text version of email body"
     )
+    body_html: str = Field(
+        default="",
+        description="HTML version of email body"
+    )
     sent_at: datetime = Field(
         description="When the email was sent"
+    )
+    received_at: datetime = Field(
+        description="When the email was received by the provider"
     )
     is_from_user: bool = Field(
         default=False,
         description="True if this message was sent by the connected user"
+    )
+    labels: List[str] = Field(
+        default_factory=list,
+        description="Provider-specific labels (e.g. UNREAD, SENT)"
     )
 
 
@@ -108,6 +124,18 @@ class EmailThreadV1(BaseModel):
     )
     provider: str = Field(
         description="Email provider: 'gmail' or 'outlook'"
+    )
+    labels: List[str] = Field(
+        default_factory=list,
+        description="Aggregated labels e.g. ['INBOX', 'UNREAD', 'IMPORTANT']"
+    )
+    is_unread: bool = Field(
+        default=False,
+        description="True if any message in thread is unread"
+    )
+    is_starred: bool = Field(
+        default=False,
+        description="True if thread is starred/flagged"
     )
     
     class Config:

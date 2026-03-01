@@ -4,25 +4,28 @@ Task Model
 SQLAlchemy model for tasks table.
 """
 
-from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Integer, Text, ForeignKey, Enum
+import uuid
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, DateTime, Integer, Text, ForeignKey, Enum, Boolean, Date
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 import enum
 
-from core.storage import Base
-
-
-class TaskType(str, enum.Enum):
-    REPLY = "reply"
-    SCHEDULE = "schedule"
-    REVIEW = "review"
-    FOLLOWUP = "followup"
+from core.storage.database import Base
 
 
 class TaskStatus(str, enum.Enum):
     PENDING = "pending"
+    TODO = "todo"
     IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    DISMISSED = "dismissed"
+    DONE = "done"
+    CANCELLED = "cancelled"
+
+
+class TaskType(str, enum.Enum):
+    GENERAL = "general"
+    EMAIL = "email"
+    FOLLOW_UP = "follow_up"
+    MEETING = "meeting"
 
 
 class PriorityLevel(str, enum.Enum):
@@ -39,30 +42,44 @@ class EffortLevel(str, enum.Enum):
 class Task(Base):
     __tablename__ = "tasks"
     
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
-    thread_id = Column(String, ForeignKey("threads.id"), nullable=False, index=True)
+    source_thread_id = Column(String, ForeignKey("threads.id"), nullable=True, index=True)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=True) # Future team tasks
     
     # Task details
     title = Column(String, nullable=False)
     description = Column(Text)
-    task_type = Column(Enum(TaskType), nullable=False)
+    status = Column(Enum(TaskStatus, native_enum=False, length=50), default=TaskStatus.PENDING, nullable=False)
+    task_type = Column(Enum(TaskType, native_enum=False, length=50), default=TaskType.GENERAL, nullable=False)
     
     # Priority
-    priority = Column(Enum(PriorityLevel), default=PriorityLevel.CAN_WAIT)
+    priority_level = Column(String, nullable=True) # urgent, high, medium, low
     priority_score = Column(Integer, default=0)
-    priority_explanation = Column(Text)
     
-    # Effort
-    effort = Column(Enum(EffortLevel), default=EffortLevel.QUICK)
+    # Source
+    source_type = Column(String, default="user_created") # ai_generated, user_created, email_converted
+    source_email_id = Column(String, ForeignKey("emails.id"), nullable=True)
+    ai_confidence = Column(Integer, nullable=True) # Scaled decimal
     
-    # Deadline
-    deadline = Column(DateTime)
-    deadline_source = Column(String)
+    # Scheduling
+    due_date = Column(Date, nullable=True)
+    due_time = Column(DateTime(timezone=True), nullable=True) # Time object or DateTime
+    reminder_at = Column(DateTime(timezone=True), nullable=True)
+    reminder_sent = Column(Boolean, default=False)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
     
-    # Status
-    status = Column(Enum(TaskStatus), default=TaskStatus.PENDING)
+    assigned_to_user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    tags = Column(ARRAY(String), default=list)
+    metadata_json = Column(JSONB, default=dict)
+    
+    version = Column(Integer, default=0)
     
     # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    
+    __table_args__ = (
+        # Indexes are managed via migration mainly
+    )
